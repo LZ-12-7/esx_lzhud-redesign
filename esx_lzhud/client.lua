@@ -11,16 +11,6 @@ function Status()
         SendNUIMessage(data)
     end
 
-    for i=1, #PlayerData.accounts, 1 do
-        if PlayerData.accounts[i].name == 'black_money' then
-            blackMoney = PlayerData.accounts[i].money
-        elseif PlayerData.accounts[i].name == 'bank' then
-            bank = PlayerData.accounts[i].money
-        elseif PlayerData.accounts[i].name == 'money' then
-            money = PlayerData.accounts[i].money
-        end 
-    end
-
     self.init = function()
         CreateThread(function()
             while(true)do
@@ -32,35 +22,32 @@ function Status()
                     self.triggerEvent('esx_status:getStatus', 'thirst', function(status)
                         thirst = status.val / 10000 
                     end)
+                    
+                    
+                     ESX.TriggerServerCallback('hud:getmoney', function(money, bank)
+                        self.sendNui({
+                            type        = "updatehud";
+                            method      = "hud";
+                            health      = (GetEntityHealth(PlayerPedId()) - 100);
+                            shield      = (GetPedArmour(PlayerPedId()));
+                            hunger      = hunger;
+                            thirst      = thirst;
+                            playerid    = (GetPlayerServerId(PlayerId()));
+                            money       = money;
+                            bank        = bank;
+                            black_money = blackMoney;
+                        })
 
-                    if IsPauseMenuActive() then
-                        self.sendNui({ action = 'hide' })
-                    else
-                        self.sendNui({ action = 'show' })
-                    end
-
-                    self.sendNui({
-                        type        = "updatehud";
-                        method      = "hud";
-                        health      = (GetEntityHealth(PlayerPedId()) - 100);
-                        shield      = (GetPedArmour(PlayerPedId()));
-                        hunger      = hunger;
-                        thirst      = thirst;
-                        playerid    = (GetPlayerServerId(PlayerId()));
-                        money       = money;
-                        bank        = bank;
-                        black_money = blackMoney;
-                    })
-
-                    if (Config.HideMiniMap) then
-                        if IsPedInAnyVehicle(PlayerPedId()) then
-                            self.sendNui({insideveh = true})
-                            DisplayRadar(true)
-                        else
-                            self.sendNui({insideveh = false})
-                            DisplayRadar(false)
+                      if (Config.HideMiniMap) then
+                            if IsPedInAnyVehicle(PlayerPedId()) then
+                                self.sendNui({insideveh = true})
+                                DisplayRadar(true)
+                            else
+                                self.sendNui({insideveh = false})
+                                DisplayRadar(false)
+                            end
                         end
-                    end
+                     end)       
             end
         end)
     end
